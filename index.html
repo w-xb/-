@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>生态恢复方案智能生成系统</title>
     <link rel="icon" type="image/x-icon" href="icon.png">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
-        
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         .image-recognition-card {
             display: flex;
             flex-direction: row;
@@ -22,7 +23,7 @@
         }
 
         .image-description {
-            order:2;
+            order: 2;
             flex: 1;
             font-size: 1rem;
             line-height: 1.6;
@@ -32,7 +33,7 @@
         }
 
         .result-image-container {
-            order:1;
+            order: 1;
             flex: 0 0 45%;
             margin: 0;
             display: flex;
@@ -41,7 +42,7 @@
         }
 
         .result-image {
-            width: 90%;
+            width: 110%;
             height: auto;
             border-radius: 8px;
             display: block;
@@ -60,37 +61,38 @@
             filter: blur(4px);
         }
 
-        
+
         @media (max-width: 768px) {
             .image-recognition-card {
                 flex-direction: column;
             }
-            
+
             .result-image-container {
-                order:1;
+                order: 1;
                 width: 100%;
                 flex: none;
             }
-            
+
             .image-description {
-                order:2;
-                
+                order: 2;
+
             }
+
             .result-image {
                 width: 100%;
             }
-            
+
             .image-shadow {
                 left: 10%;
                 width: 80%;
             }
         }
-                
+
         .image-recognition-container {
             width: 100%;
             margin-bottom: 40px;
         }
-        
+
         .image-recognition-card {
             background: white;
             border-radius: 10px;
@@ -101,25 +103,25 @@
             flex-direction: row;
             align-items: flex-start;
         }
-        
+
         .result-image-container {
             position: relative;
             width: 100%;
             margin: 20px auto;
             display: flex;
             justify-content: center;
-            
+
         }
-        
+
         .result-image {
             width: 80%;
             height: auto;
             border-radius: 8px;
             display: block;
-            margin:auto;
+            margin: auto;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         .image-shadow {
             position: absolute;
             bottom: -8px;
@@ -131,21 +133,22 @@
             z-index: -1;
             filter: blur(4px);
         }
-        
-        
+
+
         .results-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-bottom: 30px;
         }
+
         /* over */
-        
+
 
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
-            background-image:url("back.jpg");
-            background-size:cover;
+            background-image: url("back.jpg");
+            background-size: cover;
             min-height: 100vh;
             padding: 20px;
         }
@@ -189,7 +192,7 @@
         }
 
         .input-section {
-            background: #f8f9fa transparent="5%";
+            background: #f8f9fa transparent="0%";
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 30px;
@@ -201,7 +204,7 @@
             border-radius: 10px;
             padding: 40px;
             text-align: center;
-            background: white transparent="5%";
+            background: white transparent="0%";
             margin-bottom: 20px;
             transition: all 0.3s ease;
             cursor: pointer;
@@ -283,7 +286,7 @@
 
         .results-section {
             display: none;
-            background: #f8f9fa;
+            background: #b5e3ce transparent="5%";
             border-radius: 15px;
             padding: 30px;
             margin-top: 30px;
@@ -297,22 +300,22 @@
         }
 
         .result-card {
-            background: white;
+            background: rgb(254, 255, 254);
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .image-recognition-card {
-            grid-column: 1 / span 2; 
-            margin-bottom: 0; 
-            padding-bottom: 20px; 
+            grid-column: 1 / span 2;
+            margin-bottom: 0;
+            padding-bottom: 20px;
         }
 
         .result-card h3 {
             color: #2d5a27;
             margin-bottom: 25px;
-            margin-top:17px;
+            margin-top: 17px;
             font-size: 1.3rem;
         }
 
@@ -322,7 +325,7 @@
             font-size: 1.1rem;
         }
 
-        
+
 
         .plan-content {
             line-height: 1.6;
@@ -343,7 +346,7 @@
         }
 
         .feedback-section {
-            background: white;
+            background: white transparent="70%";
             border-radius: 10px;
             padding: 25px;
             margin-top: 20px;
@@ -359,7 +362,7 @@
             width: 100%;
             min-height: 100px;
             padding: 15px;
-            border: 2px solid #ddd;
+            border: 2px solid #ddd ;
             border-radius: 8px;
             font-size: 1rem;
             resize: vertical;
@@ -406,7 +409,7 @@
             text-align: center;
             padding: 20px 0;
         }
-        
+
         .local-spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #28a745;
@@ -416,7 +419,7 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 10px;
         }
-        
+
         .local-loading p {
             color: #28a745;
             font-size: 0.9rem;
@@ -434,8 +437,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .uploaded-image {
@@ -446,24 +454,90 @@
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
         }
 
+        .charts-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .charts-section h3 {
+            color: #2d5a27;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-item {
+            width: 100%;
+            height: 400px;
+            min-height: 400px;
+        }
+
+        #radarChart, #pieChart, #lineChart {
+            width: 100%;
+            height: 100%;
+        }
+
         @media (max-width: 768px) {
+
             .coordinates-input,
-            .results-grid {
+            .results-grid,
+            .charts-container {
                 grid-template-columns: 1fr;
             }
+
             .image-recognition-card {
                 grid-column: 1;
             }
+
             .header h1 {
                 font-size: 2rem;
             }
-            
+
             .main-content {
                 padding: 20px;
             }
         }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+
+            .chart-item {
+                margin-bottom: 20px;
+                height: 250px;
+                min-height: 250px;
+            }
+
+            #radarChart,
+            #pieChart,
+            #lineChart {
+                height: 100% !important;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .charts-container {
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            .chart-item:last-child {
+                grid-column: 1 / -1;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
@@ -501,7 +575,7 @@
                 <p>正在分析图片并生成恢复方案，请稍候...</p>
             </div>
 
-             
+
             <div class="results-section" id="resultsSection">
                 <h2 style="color: #3a7233; margin-bottom: 25px;">🖼️ 图片识别情况</h2>
                 <div class="image-recognition-container">
@@ -511,20 +585,18 @@
                             <img src="2.png" alt="生态破坏分析图" class="result-image">
                             <div class="image-shadow"></div>
                         </div>
-                        
+
                         <!-- 文字在右 -->
                         <div class="image-description">
-                            <p><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这张图片展示了一片被严重破坏的森林区域。画面中可以看到大量树木被砍伐，部分树干横倒在地，树桩裸露，周围地面覆盖着黑色的灰烬，仍有烟雾弥漫，表明这里经历过火烧与砍伐并存的破坏过程。整体色调偏暗，显示出生态系统遭受强烈干扰，原有植被几乎被清除殆尽。该破坏类型属于典型的"毁林开垦"与"火烧清理"复合型破坏，不仅直接损失森林植被，还导致土壤退化、生物栖息地丧失与碳排放增加。此类环境退化情况为生态修复系统设计提供了前期分析依据：后续需在土壤质量改善、耐火与速生树种选择、生态多样性恢复和火源监控等方面开展有针对性的修复措施。</p>
+                            <p style="margin-bottom: 20px;margin-top: 20px;margin-right: 20px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这张图片展示了一片被严重破坏的森林区域。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;画面中可以看到大量树木被砍伐，部分树干横倒在地，树桩裸露，周围地面覆盖着黑色的灰烬，仍有烟雾弥漫，表明这里经历过火烧与砍伐并存的破坏过程。整体色调偏暗，显示出生态系统遭受强烈干扰，原有植被几乎被清除殆尽。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;该破坏类型属于典型的"毁林开垦"与"火烧清理"复合型破坏，不仅直接损失森林植被，还导致土壤退化、生物栖息地丧失与碳排放增加。<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;此类环境退化情况为生态修复系统设计提供了前期分析依据：后续需在土壤质量改善、耐火与速生树种选择、生态多样性恢复和火源监控等方面开展有针对性的修复措施。<br>
+                            </p>
                         </div>
                     </div>
                 </div>
-                
 
                 <h2 style="color: #3a7233; margin-bottom: 25px;">📋 生态恢复方案</h2>
-                
-                <div class="results-grid">
-                    
 
+                <div class="results-grid">
                     <div class="result-card">
                         <div class="result-header">
                             <h3>🔍 生态破坏分析</h3>
@@ -534,7 +606,7 @@
                             <!-- 分析内容将在这里显示 -->
                         </div>
                     </div>
-                    
+
                     <div class="result-card">
                         <div class="result-header">
                             <h3>🌿 恢复方案建议</h3>
@@ -545,12 +617,26 @@
                     </div>
                 </div>
 
-                
+                <div class="charts-section">
+                    <h3 style="color: #2d5a27; margin-bottom: 20px; text-align: center;">📊 生态恢复数据可视化</h3>
+                    <div class="charts-container">
+                        <div class="chart-item">
+                            <div id="radarChart"></div>
+                        </div>
+                        <div class="chart-item">
+                            <div id="pieChart"></div>
+                        </div>
+                        <div class="chart-item">
+                            <div id="lineChart"></div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="feedback-section">
                     <h3>💬 方案调整建议</h3>
                     <p style="color: #666; margin-bottom: 15px;">如果您对当前方案有任何调整建议，请在下方输入：</p>
-                    <textarea class="feedback-input" id="feedbackInput" placeholder="例如：希望增加更多本地植物种类，或者调整种植密度..."></textarea>
+                    <textarea class="feedback-input" id="feedbackInput"
+                        placeholder="例如：希望增加更多本地植物种类，或者调整种植密度..."></textarea>
                     <button class="improve-btn" id="improveBtn">🔄 重新优化方案</button>
                     <div class="local-loading" id="improveLoading">
                         <div class="local-spinner"></div>
@@ -575,18 +661,25 @@
                 const generateBtn = document.getElementById('generateBtn');
                 const improveBtn = document.getElementById('improveBtn');
 
-                
+
                 uploadArea.addEventListener('click', () => imageInput.click());
                 uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
                 uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
                 uploadArea.addEventListener('drop', this.handleDrop.bind(this));
                 imageInput.addEventListener('change', this.handleFileSelect.bind(this));
 
-                
+
                 generateBtn.addEventListener('click', this.generatePlan.bind(this));
 
-                
+
                 improveBtn.addEventListener('click', this.improvePlan.bind(this));
+                
+                // 监听窗口大小变化，重新调整图表大小
+                window.addEventListener('resize', () => {
+                    if (this.currentPlan) {
+                        this.resizeCharts();
+                    }
+                });
             }
 
             handleDragOver(e) {
@@ -645,26 +738,31 @@
                 }
 
                 this.showLoading(true);
-                
-                
+
+
                 await this.delay(3000);
 
-                
+
                 const analysis = this.generateAnalysis(latitude, longitude);
                 const plan = this.generateRestorationPlan(latitude, longitude);
-                
+
                 this.currentPlan = { analysis, plan, coordinates: { latitude, longitude } };
                 this.displayResults(analysis, plan);
                 this.generateSimulatedImage();
-                
+
                 this.showLoading(false);
                 document.getElementById('resultsSection').style.display = 'block';
+                
+                // 确保图表容器可见后再初始化图表
+                setTimeout(() => {
+                    this.initializeCharts();
+                }, 100);
             }
 
             generateAnalysis(lat, lng) {
                 const damageTypes = ['土壤侵蚀', '植被退化', '水土流失', '生物多样性减少', '土壤污染'];
                 const selectedDamage = damageTypes[Math.floor(Math.random() * damageTypes.length)];
-                
+
                 return `
                     <br><h4>📍 位置分析：</h4>
                     &nbsp&nbsp&nbsp&nbsp经纬度为${lat}°N, ${lng}°E的大兴安岭地区位于中国东北部，北纬39°45′至40°15′，东经121°50′至123°00′。该区域地形以山地为主，植被以针叶林为主，为典型的温带落叶阔叶林。
@@ -689,7 +787,7 @@
             generateRestorationPlan(lat, lng) {
                 const plants = ['本地乔木', '灌木丛', '草本植物', '湿地植物'];
                 const methods = ['梯田建设', '生物工程', '土壤改良', '水系恢复'];
-                
+
                 return `
                     <br><h4>🌱 植被恢复：</h4>
                    <strong>1.具体植物种类：</strong>选择耐旱、耐寒的树种，如红松、水杉、油松等。<br>
@@ -732,16 +830,208 @@
                 document.getElementById('planContent').innerHTML = plan;
             }
 
+            initializeCharts() {
+                // 先销毁已存在的图表实例
+                if (this.radarChart) this.radarChart.dispose();
+                if (this.pieChart) this.pieChart.dispose();
+                if (this.lineChart) this.lineChart.dispose();
+                
+                // 初始化新图表
+                this.initRadarChart();
+                this.initPieChart();
+                this.initLineChart();
+            }
+
+            initRadarChart() {
+                // 确保容器存在且可见
+                const radarContainer = document.getElementById('radarChart');
+                if (!radarContainer) return;
+                
+                this.radarChart = echarts.init(radarContainer);
+                const radarOption = {
+                    color: ['#67F9D8', '#FFE434', '#56A3F1', '#FF917C'],
+                    title: {
+                        text: '大兴安岭森林破坏后恢复情况雷达图',
+                        left: 'center',
+                        textStyle: {
+                            fontSize: 14
+                        }
+                    },
+                    legend: {
+                        data: ['破坏后初期', '恢复1年', '恢复3年', '恢复5年'],
+                        bottom: '5%',
+                        left: 'center'
+                    },
+                    radar: {
+                        indicator: [
+                            { text: '植被覆盖率(%)', max: 100 },
+                            { text: '生物多样性指数', max: 10 },
+                            { text: '土壤有机质含量(%)', max: 10 },
+                            { text: '水土流失控制率(%)', max: 100 },
+                            { text: '森林固碳能力(t/ha)', max: 50 }
+                        ]
+                    },
+                    series: [{
+                        name: '森林恢复情况',
+                        type: 'radar',
+                        data: [
+                            {
+                                value: [15, 2, 1.5, 20, 5],
+                                name: '破坏后初期'
+                            },
+                            {
+                                value: [35, 4, 3, 45, 12],
+                                name: '恢复1年'
+                            },
+                            {
+                                value: [60, 6, 5, 70, 25],
+                                name: '恢复3年'
+                            },
+                            {
+                                value: [85, 8, 7.5, 90, 40],
+                                name: '恢复5年'
+                            }
+                        ]
+                    }]
+                };
+                this.radarChart.setOption(radarOption);
+            }
+
+            initPieChart() {
+                // 确保容器存在且可见
+                const pieContainer = document.getElementById('pieChart');
+                if (!pieContainer) return;
+                
+                this.pieChart = echarts.init(pieContainer);
+                const treeData = [
+                    { name: '落叶松', value: 40 },
+                    { name: '白桦', value: 25 },
+                    { name: '樟子松', value: 15 },
+                    { name: '杨树', value: 10 },
+                    { name: '云杉', value: 5 },
+                    { name: '柳树', value: 3 },
+                    { name: '榆树', value: 1.5 },
+                    { name: '其他阔叶树', value: 0.5 }
+                ];
+
+                const pieOption = {
+                    title: {
+                        text: '大兴安岭地区树木种类占比',
+                        subtext: '数据为统计近似值',
+                        left: 'center',
+                        textStyle: {
+                            fontSize: 14
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: '{a} <br/>{b} : {c}% ({d}%)'
+                    },
+                    legend: {
+                        bottom: '5%',
+                        left: 'center',
+                        data: treeData.map(item => item.name)
+                    },
+                    series: [
+                        {
+                            name: '树种占比',
+                            type: 'pie',
+                            radius: '65%',
+                            center: ['50%', '45%'],
+                            data: treeData,
+                            emphasis: {
+                                itemStyle: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
+                            }
+                        }
+                    ]
+                };
+                this.pieChart.setOption(pieOption);
+            }
+
+            initLineChart() {
+                // 确保容器存在且可见
+                const lineContainer = document.getElementById('lineChart');
+                if (!lineContainer) return;
+                
+                this.lineChart = echarts.init(lineContainer);
+                const lineOption = {
+                    title: {
+                        text: '生态恢复进度趋势图',
+                        left: 'center',
+                        textStyle: {
+                            fontSize: 14
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis'
+                    },
+                    legend: {
+                        data: ['植被覆盖率', '生物多样性', '土壤质量'],
+                        bottom: '5%'
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '15%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data: ['初期', '6个月', '1年', '2年', '3年', '4年', '5年']
+                    },
+                    yAxis: {
+                        type: 'value',
+                        max: 100
+                    },
+                    series: [
+                        {
+                            name: '植被覆盖率',
+                            type: 'line',
+                            stack: 'Total',
+                            data: [15, 25, 35, 50, 60, 75, 85],
+                            smooth: true
+                        },
+                        {
+                            name: '生物多样性',
+                            type: 'line',
+                            stack: 'Total',
+                            data: [20, 30, 40, 55, 65, 75, 80],
+                            smooth: true
+                        },
+                        {
+                            name: '土壤质量',
+                            type: 'line',
+                            stack: 'Total',
+                            data: [10, 20, 30, 45, 55, 70, 75],
+                            smooth: true
+                        }
+                    ]
+                };
+                this.lineChart.setOption(lineOption);
+            }
+
+            // 调整图表大小
+            resizeCharts() {
+                if (this.radarChart) this.radarChart.resize();
+                if (this.pieChart) this.pieChart.resize();
+                if (this.lineChart) this.lineChart.resize();
+            }
+
             generateSimulatedImage() {
                 const simulatedImage = document.getElementById('simulatedImage');
                 const colors = ['#4CAF50', '#8BC34A', '#CDDC39', '#FFC107'];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                
-                            }
+
+            }
 
             async improvePlan() {
                 const feedback = document.getElementById('feedbackInput').value.trim();
-                
+
                 if (!feedback) {
                     alert('请输入您的调整建议！');
                     return;
@@ -752,34 +1042,35 @@
                     return;
                 }
 
-                
+
                 document.getElementById('improveBtn').disabled = true;
                 document.getElementById('improveLoading').style.display = 'block';
-                
-                
+
+
                 await this.delay(2500);
-                
-                
+
+
                 const improvedAnalysis = this.generateImprovedAnalysis(feedback);
                 const improvedPlan = this.generateImprovedPlan(feedback);
-                
+
                 this.displayResults(improvedAnalysis, improvedPlan);
                 this.generateSimulatedImage();
-                
-                
+                this.initializeCharts();
+
+
                 document.getElementById('improveLoading').style.display = 'none';
                 document.getElementById('improveBtn').disabled = false;
-                
-                
+
+
                 document.getElementById('feedbackInput').value = '';
-                
-                
+
+
                 this.showImprovementNotification();
             }
 
             generateImprovedAnalysis(feedback) {
                 const baseAnalysis = this.currentPlan.analysis;
-                return  `<br>&nbsp&nbsp&nbsp<strong>根据您的调整需求，这是给您的更加通俗详尽生态恢复方案:</strong><br><br>
+                return `<br>&nbsp&nbsp&nbsp<strong>根据您的调整需求，这是给您的更加通俗详尽生态恢复方案:</strong><br><br>
                     <h4>📍 位置分析：</h4>
                     &nbsp&nbsp&nbsp&nbsp大兴安岭区域位于中国东北地区，经纬度为50°N，125°E，这标志着该区域处于北纬35°至北纬55°的高纬度地区。此位置拥有丰富的自然生态资源，包括丰富的森林、草原、山地等生态系统，对周边地区环境稳定与生态平衡起着至关重要的作用。
 <br><br>
@@ -807,9 +1098,9 @@
                     '完善了生态监测体系',
                     '调整了实施时间安排'
                 ];
-                
+
                 const selectedImprovement = improvements[Math.floor(Math.random() * improvements.length)];
-                
+
                 return `<br><h4>🌱 植被恢复：</h4>
 
                    <strong>1.植被种类选择：</strong><br>
@@ -855,9 +1146,6 @@
                     2.水系工程	300 - 500元/公里<br>
                     3.生态修复	10 - 20万元/公顷<br>
                     4.生态恢复	5 - 10万元/公顷<br><br>`;
-
-                    
-
             }
 
             showImprovementNotification() {
@@ -876,7 +1164,7 @@
                 `;
                 notification.textContent = '✅ 方案已根据您的建议成功优化！';
                 document.body.appendChild(notification);
-                
+
                 setTimeout(() => {
                     notification.remove();
                 }, 3000);
@@ -899,4 +1187,5 @@
         });
     </script>
 </body>
+
 </html>
