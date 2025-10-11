@@ -204,10 +204,11 @@
             border-radius: 10px;
             padding: 40px;
             text-align: center;
-            background: white transparent="0%";
+            background: white transparent="0%"; 
             margin-bottom: 20px;
             transition: all 0.3s ease;
             cursor: pointer;
+            
         }
 
         .upload-area:hover {
@@ -228,11 +229,15 @@
         }
 
         .coordinates-input {
+            width: 100%;
+            box-sizing: border-box;
+}
+        /* .coordinates-input {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-top: 20px;
-        }
+        } */
 
         .input-group {
             display: flex;
@@ -558,13 +563,12 @@
 
                 <div class="coordinates-input">
                     <div class="input-group">
-                        <label for="latitude">🌍 纬度 (Latitude)</label>
-                        <input type="number" id="latitude" placeholder="例如: 39.9042" step="any">
+                        <h2 style="color: #3a7233; margin-bottom: 20px;">📍 位置信息</h2>
+                        <!-- <textarea class="feedback-input" id="feedbackInput"
+                        placeholder="例如：希望增加更多本地植物种类，或者调整种植密度..."></textarea> -->
+                        <input type="text" id="location" placeholder="例如: 云南西双版纳热带雨林，河北唐山开滦煤矿塌陷区，青海三江源国家公园，广东湛江红树林湿地......" step="any">
                     </div>
-                    <div class="input-group">
-                        <label for="longitude">🗺️ 经度 (Longitude)</label>
-                        <input type="number" id="longitude" placeholder="例如: 116.4074" step="any">
-                    </div>
+                    
                 </div>
 
                 <button class="generate-btn" id="generateBtn">🚀 生成生态恢复方案</button>
@@ -663,7 +667,7 @@
 
 
                 uploadArea.addEventListener('click', () => imageInput.click());
-                uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
+                 uploadArea.addEventListener('dragover', this.handleDragOver.bind(this));
                 uploadArea.addEventListener('dragleave', this.handleDragLeave.bind(this));
                 uploadArea.addEventListener('drop', this.handleDrop.bind(this));
                 imageInput.addEventListener('change', this.handleFileSelect.bind(this));
@@ -724,106 +728,178 @@
             }
 
             async generatePlan() {
-                const latitude = document.getElementById('latitude').value;
-                const longitude = document.getElementById('longitude').value;
+                const location = document.getElementById('location').value;
 
                 if (!this.uploadedImage) {
                     alert('请先上传生态破坏图片！');
                     return;
                 }
 
-                if (!latitude || !longitude) {
-                    alert('请输入地理坐标！');
+                if (!location) {
+                    alert('请输入位置信息！');
                     return;
                 }
 
                 this.showLoading(true);
 
+                try {
+                    // 准备表单数据
+                    const formData = new FormData();
+                    formData.append('image', this.uploadedImage);
+                    formData.append('location', location);
 
-                await this.delay(3000);
+                    // API请求配置
+                    const API_URL = "https://api-3al278aft14bh8w7.aistudio-app.com/generate_ecology_plan";
+                    const ACCESS_TOKEN = "f0ccaa1571f2cd0254a33012c52a4da9073e6049";
+                    
+                    // 发送请求
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            "Authorization": `Bearer ${ACCESS_TOKEN}`
+                            // 注意：不要手动设置Content-Type，浏览器会自动处理
+                        },
+                        body: formData,
+                        // 处理跨域问题，如果API允许跨域可以不加
+                        mode: 'cors'
+                    });
 
+                    if (!response.ok) {
+                        throw new Error(`HTTP错误状态: ${response.status}`);
+                    }
 
-                const analysis = this.generateAnalysis(latitude, longitude);
-                const plan = this.generateRestorationPlan(latitude, longitude);
+                    // 解析响应数据
+                    const result = await response.json();
+                    
+                    // 假设API返回的数据结构包含damage_description和recovery_plan字段
+                    if (result.success) {
+                        this.currentPlan = {
+                            analysis: result.damage_description,
+                            plan: result.recovery_plan,
+                            location: location
+                        };
+                        this.displayResults(result.damage_description, result.recovery_plan);
+                        document.getElementById('resultsSection').style.display = 'block';
+                        
+                        // 初始化图表
+                        setTimeout(() => {
+                            this.initializeCharts();
+                        }, 100);
+                    } else {
+                        throw new Error(result.message || '生成方案失败');
+                    }
 
-                this.currentPlan = { analysis, plan, coordinates: { latitude, longitude } };
-                this.displayResults(analysis, plan);
-                this.generateSimulatedImage();
+                } catch (err) {
+                    console.error('调用失败：', err);
+                    alert(`生成方案失败: ${err.message}`);
+                } finally {
+                    this.showLoading(false);
+                }
+            }
 
-                this.showLoading(false);
-                document.getElementById('resultsSection').style.display = 'block';
+            // 陆辰悦
+            // async generatePlan() {
+            //     const location = document.getElementById('location').value;
                 
-                // 确保图表容器可见后再初始化图表
-                setTimeout(() => {
-                    this.initializeCharts();
-                }, 100);
-            }
 
-            generateAnalysis(lat, lng) {
-                const damageTypes = ['土壤侵蚀', '植被退化', '水土流失', '生物多样性减少', '土壤污染'];
-                const selectedDamage = damageTypes[Math.floor(Math.random() * damageTypes.length)];
+            //     if (!this.uploadedImage) {
+            //         alert('请先上传生态破坏图片！');
+            //         return;
+            //     }
 
-                return `
-                    <br><h4>📍 位置分析：</h4>
-                    &nbsp&nbsp&nbsp&nbsp经纬度为${lat}°N, ${lng}°E的大兴安岭地区位于中国东北部，北纬39°45′至40°15′，东经121°50′至123°00′。该区域地形以山地为主，植被以针叶林为主，为典型的温带落叶阔叶林。
-<br><br>
+            //     if (!location) {
+            //         alert('请输入位置信息！');
+            //         return;
+            //     }
+
+            //     this.showLoading(true);
+
+
+            //     await this.delay(3000);
+
+
+            //     const analysis = this.generateAnalysis(location);
+            //     const plan = this.generateRestorationPlan(location);
+
+            //     this.currentPlan = { analysis, plan, location:location };
+            //     // this.currentPlan = { analysis, plan, coordinates: { latitude, longitude } };
+            //     this.displayResults(analysis, plan);
+            //     // this.generateSimulatedImage();
+
+            //     this.showLoading(false);
+            //     document.getElementById('resultsSection').style.display = 'block';
+                
+            //     // 确保图表容器可见后再初始化图表
+            //     setTimeout(() => {
+            //         this.initializeCharts();
+            //     }, 100);
+            // }
+// 陆辰悦
+//             generateAnalysis(lat, lng) {
+//                 const damageTypes = ['土壤侵蚀', '植被退化', '水土流失', '生物多样性减少', '土壤污染'];
+//                 const selectedDamage = damageTypes[Math.floor(Math.random() * damageTypes.length)];
+
+//                 return `
+//                     <br><h4>📍 位置分析：</h4>
+//                     &nbsp&nbsp&nbsp&nbsp大兴安岭地区位于中国东北部，北纬39°45′至40°15′，东经121°50′至123°00′。该区域地形以山地为主，植被以针叶林为主，为典型的温带落叶阔叶林。
+// <br><br>
                     
-                    <h4>📝 主要问题：</h4>
-                  <strong>1. 植被破坏：</strong>近十年因过度砍伐、采伐导致大量针叶林被破坏，裸露地表面积达数平方公里，破坏力巨大。<br>
-                  <strong>2. 水土流失：</strong>森林面积缩减至60%以下，水土流失速度加快，侵蚀力增强。<br>
-                  <strong>3. 生物多样性下降：</strong>主要物种如马尾松、红松、水杉等数量锐减，生物多样性锐减。<br>
-                  <strong>4. 气候问题：</strong>受冻害频发，年降水量减少，对生态平衡造成威胁。<br><br>
+//                     <h4>📝 主要问题：</h4>
+//                   <strong>1. 植被破坏：</strong>近十年因过度砍伐、采伐导致大量针叶林被破坏，裸露地表面积达数平方公里，破坏力巨大。<br>
+//                   <strong>2. 水土流失：</strong>森林面积缩减至60%以下，水土流失速度加快，侵蚀力增强。<br>
+//                   <strong>3. 生物多样性下降：</strong>主要物种如马尾松、红松、水杉等数量锐减，生物多样性锐减。<br>
+//                   <strong>4. 气候问题：</strong>受冻害频发，年降水量减少，对生态平衡造成威胁。<br><br>
                     
-                    <strong>📊 破坏程度：</strong><br>
-                  &nbsp&nbsp&nbsp• 面积与强度：植被破坏面积占林地面积的60%，年均水土流失量达2000吨/年，生物多样性损失达40%。<br>
-                  &nbsp&nbsp&nbsp• 时间与频率：每年发生约3次，导致森林退化速度加快。<br><br>
+//                     <strong>📊 破坏程度：</strong><br>
+//                   &nbsp&nbsp&nbsp• 面积与强度：植被破坏面积占林地面积的60%，年均水土流失量达2000吨/年，生物多样性损失达40%。<br>
+//                   &nbsp&nbsp&nbsp• 时间与频率：每年发生约3次，导致森林退化速度加快。<br><br>
 
-                    <strong>⏱️ 预计恢复周期：</strong><br>
-                  &nbsp&nbsp&nbsp• 时间规划：短期（1-3年）：植被恢复、生物重建、生态修复。<br>
-                  &nbsp&nbsp&nbsp• 长期目标：恢复森林面积30%，生物多样性提升至20%，恢复植被面积达80%。<br><br>
-                `;
-            }
+//                     <strong>⏱️ 预计恢复周期：</strong><br>
+//                   &nbsp&nbsp&nbsp• 时间规划：短期（1-3年）：植被恢复、生物重建、生态修复。<br>
+//                   &nbsp&nbsp&nbsp• 长期目标：恢复森林面积30%，生物多样性提升至20%，恢复植被面积达80%。<br><br>
+//                 `;
+//             }
 
-            generateRestorationPlan(lat, lng) {
-                const plants = ['本地乔木', '灌木丛', '草本植物', '湿地植物'];
-                const methods = ['梯田建设', '生物工程', '土壤改良', '水系恢复'];
+//             generateRestorationPlan(lat, lng) {
+//                 const plants = ['本地乔木', '灌木丛', '草本植物', '湿地植物'];
+//                 const methods = ['梯田建设', '生物工程', '土壤改良', '水系恢复'];
 
-                return `
-                    <br><h4>🌱 植被恢复：</h4>
-                   <strong>1.具体植物种类：</strong>选择耐旱、耐寒的树种，如红松、水杉、油松等。<br>
-                   <strong>2. 群落构建：</strong><br>
-                    &nbsp&nbsp&nbsp• 更新树种：通过轮伐更新，每年更新1-2棵树种。<br>
-                    &nbsp&nbsp&nbsp• 恢复幼苗：在林缘和沟壑处种植小苗，增强群落稳定性。<br>
-                   <strong>3. 生态恢复：</strong><br>
-                    &nbsp&nbsp&nbsp• 恢复退化地表，恢复植被覆盖度。<br>
-                    &nbsp&nbsp&nbsp• 构建湿地生态圈，增加水生生物栖息地。<br><br>
+//                 return `
+//                     <br><h4>🌱 植被恢复：</h4>
+//                    <strong>1.具体植物种类：</strong>选择耐旱、耐寒的树种，如红松、水杉、油松等。<br>
+//                    <strong>2. 群落构建：</strong><br>
+//                     &nbsp&nbsp&nbsp• 更新树种：通过轮伐更新，每年更新1-2棵树种。<br>
+//                     &nbsp&nbsp&nbsp• 恢复幼苗：在林缘和沟壑处种植小苗，增强群落稳定性。<br>
+//                    <strong>3. 生态恢复：</strong><br>
+//                     &nbsp&nbsp&nbsp• 恢复退化地表，恢复植被覆盖度。<br>
+//                     &nbsp&nbsp&nbsp• 构建湿地生态圈，增加水生生物栖息地。<br><br>
                     
-                    <h4>🛠️ 工程措施：</h4>
-                    <strong>1. 水系工程：</strong><br>
-                    &nbsp&nbsp&nbsp• 修复退化溪流，恢复潟湖。<br>
-                    &nbsp&nbsp&nbsp• 构建人工湿地，调节径流，净化水质。<br>
-                    <strong>2. 护坡工程：</strong><br>
-                    &nbsp&nbsp&nbsp• 修复裸露地表，保护植被。<br>
-                    &nbsp&nbsp&nbsp• 增加护坡坡度，防止水土流失。<br>
-                    <strong>3. 排水工程：</strong><br>
-                    &nbsp&nbsp&nbsp• 修复退化排水沟，恢复地表径流。<br>
-                    &nbsp&nbsp&nbsp• 增加排水设施，防止地下水位下降。<br><br>
+//                     <h4>🛠️ 工程措施：</h4>
+//                     <strong>1. 水系工程：</strong><br>
+//                     &nbsp&nbsp&nbsp• 修复退化溪流，恢复潟湖。<br>
+//                     &nbsp&nbsp&nbsp• 构建人工湿地，调节径流，净化水质。<br>
+//                     <strong>2. 护坡工程：</strong><br>
+//                     &nbsp&nbsp&nbsp• 修复裸露地表，保护植被。<br>
+//                     &nbsp&nbsp&nbsp• 增加护坡坡度，防止水土流失。<br>
+//                     <strong>3. 排水工程：</strong><br>
+//                     &nbsp&nbsp&nbsp• 修复退化排水沟，恢复地表径流。<br>
+//                     &nbsp&nbsp&nbsp• 增加排水设施，防止地下水位下降。<br><br>
                     
-                    <h4>📈 实施步骤：</h4>
-                    <strong>1. 分阶段推进：</strong><br>
-                    &nbsp&nbsp&nbsp• 基础建设：进行树种更新、植被恢复、生态修复。<br>
-                    &nbsp&nbsp&nbsp• 生态修复：构建湿地生态圈，修复退化地表。<br>
-                    &nbsp&nbsp&nbsp• 生态恢复：恢复植被覆盖度，增强生物多样性。<br>
-                    <strong>2. 时间周期：</strong>3-5年，分阶段实施。<br><br>
+//                     <h4>📈 实施步骤：</h4>
+//                     <strong>1. 分阶段推进：</strong><br>
+//                     &nbsp&nbsp&nbsp• 基础建设：进行树种更新、植被恢复、生态修复。<br>
+//                     &nbsp&nbsp&nbsp• 生态修复：构建湿地生态圈，修复退化地表。<br>
+//                     &nbsp&nbsp&nbsp• 生态恢复：恢复植被覆盖度，增强生物多样性。<br>
+//                     <strong>2. 时间周期：</strong>3-5年，分阶段实施。<br><br>
                     
-                    <h4>💰 预估成本：</h4>
-                    1.植被恢复	5000 - 10000元/公顷<br>
-                    2.水系工程	300 - 500元/公里<br>
-                    3.生态修复	10 - 20万元/公顷<br>
-                    4.生态恢复	5 - 10万元/公顷<br><br>
+//                     <h4>💰 预估成本：</h4>
+//                     1.植被恢复	5000 - 10000元/公顷<br>
+//                     2.水系工程	300 - 500元/公里<br>
+//                     3.生态修复	10 - 20万元/公顷<br>
+//                     4.生态恢复	5 - 10万元/公顷<br><br>
 
-                                  `;
-            }
+//                                   `;
+//             }
 
             displayResults(analysis, plan) {
                 document.getElementById('analysisContent').innerHTML = analysis;
@@ -1022,12 +1098,12 @@
                 if (this.lineChart) this.lineChart.resize();
             }
 
-            generateSimulatedImage() {
-                const simulatedImage = document.getElementById('simulatedImage');
-                const colors = ['#4CAF50', '#8BC34A', '#CDDC39', '#FFC107'];
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            // generateSimulatedImage() {
+            //     const simulatedImage = document.getElementById('simulatedImage');
+            //     const colors = ['#4CAF50', '#8BC34A', '#CDDC39', '#FFC107'];
+            //     const randomColor = colors[Math.floor(Math.random() * colors.length)];
 
-            }
+            // }
 
             async improvePlan() {
                 const feedback = document.getElementById('feedbackInput').value.trim();
@@ -1054,7 +1130,7 @@
                 const improvedPlan = this.generateImprovedPlan(feedback);
 
                 this.displayResults(improvedAnalysis, improvedPlan);
-                this.generateSimulatedImage();
+                // this.generateSimulatedImage();
                 this.initializeCharts();
 
 
@@ -1169,12 +1245,22 @@
                     notification.remove();
                 }, 3000);
             }
-
             showLoading(show) {
-                document.getElementById('loading').style.display = show ? 'block' : 'none';
-                document.getElementById('generateBtn').disabled = show;
-                document.getElementById('improveBtn').disabled = show;
+                const loadingElement = document.getElementById('loading');
+                if (show) {
+                    loadingElement.style.display = 'block';
+                    // 隐藏结果区域
+                    document.getElementById('resultsSection').style.display = 'none';
+                } else {
+                    loadingElement.style.display = 'none';
+                }
             }
+            // 陆辰悦
+            // showLoading(show) {
+            //     document.getElementById('loading').style.display = show ? 'block' : 'none';
+            //     document.getElementById('generateBtn').disabled = show;
+            //     document.getElementById('improveBtn').disabled = show;
+            // }
 
             delay(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
