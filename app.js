@@ -282,61 +282,73 @@ async generatePlan() {
           throw new Error(`HTTP错误 ${response.status}`);
       }
 
-      // 处理流式响应
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let analysisText = "";
-      let planText = "";
-      let currentSection = "analysis"; // 用于区分当前是分析还是方案
+// 处理流式响应（仅修改此部分）
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let analysisText = "";
+let planText = "";
+let currentSection = null; // 初始无章节，等待标记触发
 
-      while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
+    const chunk = decoder.decode(value, { stream: true });
+    const lines = chunk.split("\n");
 
-          for (const line of lines) {
-              if (line.trim() === "data: [DONE]") {
-                  reader.cancel();
-                  break;
-              }
-              if (!line.startsWith("data:")) continue;
+    for (const line of lines) {
+        if (line.trim() === "data: [DONE]") {
+            reader.cancel();
+            break;
+        }
+        if (!line.startsWith("data:")) continue;
 
-              try {
-                const data = JSON.parse(line.slice(5));
-                if (data.answer) {
+        try {
+            const data = JSON.parse(line.slice(5));
+            if (data.answer) {
+                console.log('原始数据:', data.answer);
+                console.log('当前章节:', currentSection);
 
-                    // 添加调试日志
-                        console.log('原始数据:', data.answer);
-                        console.log('当前章节:', currentSection);
-
-                    // 检查是否遇到新的章节标记
-                    if (data.answer.includes("## 生态破坏分析")) {
-                        currentSection = "analysis";
-                        continue;
-                    }
-                    if (data.answer.includes("## 恢复方案建议")) {
-                        currentSection = "plan";
-                        continue;
-                    }
-    
-                    // 根据当前章节添加内容
-                    if (currentSection === "analysis") {
-                        analysisText += data.answer;
-                        console.log('分析文本累积:', analysisText); // 添加调试日志
-                        analysisEl.innerHTML = markdownToHtml(analysisText);
-                    } else if (currentSection === "plan") {
-                        planText += data.answer;
-                        console.log('方案文本累积:', planText); // 添加调试日志
-                        planEl.innerHTML = markdownToHtml(planText);
-                    }
+                // 检查章节标记并切割内容（核心修改）
+                // 1. 处理"## 图片描述"标记
+                if (data.answer.includes("## 生态背景分析")) {
+                    // 分割标记前后内容，只保留标记后部分
+                    const parts = data.answer.split("## 生态背景分析");
+                    const contentAfterMarker = parts.slice(1).join("## 生态背景分析");
+                    
+                    currentSection = "analysis";
+                    analysisText = contentAfterMarker; // 重置为标记后内容
+                    analysisEl.innerHTML = markdownToHtml(analysisText);
+                    continue;
                 }
-            } catch (e) {
-                console.warn("解析失败行：", line);
+
+                // 2. 处理"## 生态恢复方案"标记
+                if (data.answer.includes("## 生态恢复方案")) {
+                    const parts = data.answer.split("## 生态恢复方案");
+                    const contentAfterMarker = parts.slice(1).join("## 生态恢复方案");
+                    
+                    currentSection = "plan";
+                    planText = contentAfterMarker; // 重置为标记后内容
+                    planEl.innerHTML = markdownToHtml(planText);
+                    continue;
+                }
+
+                // 3. 根据当前章节追加内容（仅在检测到标记后才开始累积）
+                if (currentSection === "analysis") {
+                    analysisText += data.answer;
+                    analysisEl.innerHTML = markdownToHtml(analysisText);
+                    console.log('分析文本累积:', analysisText);
+                } else if (currentSection === "plan") {
+                    planText += data.answer;
+                    planEl.innerHTML = markdownToHtml(planText);
+                    console.log('方案文本累积:', planText);
+                }
             }
+        } catch (e) {
+            console.warn("解析失败行：", line);
         }
     }
+}
 
       // 保存当前方案
       this.currentPlan = {
